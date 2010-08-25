@@ -21,6 +21,7 @@ sub move
 	{
 		$self->x($nx);
 		$self->y($ny);
+		$self->facing(atan2($dy,$dx)*180/3.14159);
 		return 1;
 	}
 
@@ -55,16 +56,7 @@ sub look
 			}
 		}
 		print "\n";
-	}
-	
-	# for(my $y = 0; $y < @map; ++$y)
-	# {
-	# 	for(my $x = 0; $x < @{$map[0]}; ++$x)
-	# 	{
-	# 		print $map[$x][$y];
-	# 	}
-	# 	print "\n";
-	# }
+	}	
 }
 
 sub fov
@@ -78,9 +70,8 @@ sub fov
 			$map->[$x][$y] = 0;
 		}
 	}
-
-	for(my $i = 0 ; $i < 360; $i += 1)
-#	my $i = 0;
+	
+	for(my $i = 0; $i < 360; $i += 1)
 	{
 		my $x = cos($i*0.01745);
 		my $y = sin($i*0.01745);
@@ -99,20 +90,16 @@ sub cast_ray
 
 	for(my $i = 0; $i < $self->sight_range; ++$i)
 	{
+		# Perl's method for rounding isn't the most intuitive...
 		my $rx = int(sprintf("%.0f",$ox));
 		my $ry = int(sprintf("%.0f",$oy));
 
 		$map->[$rx+$self->sight_range][$ry+$self->sight_range] = 1;
-		if($self->room->check_opaque($px+$rx,$py+$ry) && ($rx != 0 || $ry != 0))
-		{
-			return $map;
-		}
-		my $c = $self->room->check_opaque($px+$rx,$py+$ry);
-		my $b = ($rx ? 1 : 0);
-		my $d = ($ry ? 1 : 0);
-		
+
+		# Extend the ray
 		$ox += $x;
 		$oy += $y;
+		last if($self->room->check_opaque($px+$rx,$py+$ry) && ($rx != 0|| $ry != 0));
 	}
 
 	return $map;
