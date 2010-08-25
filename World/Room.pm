@@ -73,5 +73,24 @@ sub add_feature
 	$self->map_legend->{$feature->char} = $feature;
 }
 
+sub check_solid
+{
+	my $self = shift;
+	my ($x,$y) = @_;
+	return 1 if ($x < 0 || $x >= $self->width);
+	return 1 if ($y < 0 || $y >= $self->height);
+	
+	return $self->map->[$y]->[$x]->solid;
+}
+
+sub check_opaque
+{
+	my $self = shift;
+	my ($x,$y) = @_;
+	return 1 if ($x < 0 || $x >= $self->width);
+	return 1 if ($y < 0 || $y >= $self->height);
+	
+	return $self->map->[$y]->[$x]->opaque;
+}
 
 1;
