@@ -64,8 +64,12 @@ sub learn_map
 			my $ty = $y-$self->y+$self->sight_range;
 			if ($tx > 0 && $ty > 0 && $map[$tx][$ty])
 			{
-				# TODO: I'm not sure if this will cause a lot of extra allocations. Need to look into this.
-				$self->map_memory->[$y]->[$x] = $self->room->map->[$y]->[$x]->clone;
+				my $memory = $self->map_memory->[$y]->[$x];
+				my $actual = $self->room->map->[$y]->[$x];
+				if (!$memory->compare($actual))
+				{
+					$self->map_memory->[$y]->[$x] = $actual->clone;
+				}
 			}
 		}
 	}
