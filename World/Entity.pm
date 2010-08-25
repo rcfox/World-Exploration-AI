@@ -11,6 +11,29 @@ has 'name' => (isa => 'Str', is => 'rw');
 
 has 'room' => (isa => 'World::Room', is => 'rw');
 
+has 'map_memory' =>
+    (
+	    isa => 'ArrayRef[ArrayRef[World::Feature]]',
+	    is => 'rw',
+	    lazy => 1,
+	    default => sub
+	    {
+		    my $self = shift;
+		    my @map;
+		    my $nothing = World::Feature->new(char=>' ');
+		    for(my $y = 0; $y < $self->room->height; ++$y)
+		    {
+			    my @row;
+			    for (my $x = 0; $x < $self->room->width; ++$x)
+			    {
+				    push @row, $nothing;
+			    }
+			    push @map, \@row;
+		    }
+		    return \@map
+	    },
+	);
+
 sub move
 {
 	my $self = shift;
@@ -26,6 +49,46 @@ sub move
 	}
 
 	return 0;
+}
+
+sub learn_map
+{
+	my $self = shift;
+	my @map = @{$self->fov};
+
+	for(my $y = 0; $y < $self->room->height; ++$y)
+	{
+		for(my $x = 0; $x < $self->room->width; ++$x)
+		{
+			my $tx = $x-$self->x+$self->sight_range;
+			my $ty = $y-$self->y+$self->sight_range;
+			if ($tx > 0 && $ty > 0 && $map[$tx][$ty])
+			{
+				# TODO: I'm not sure if this will cause a lot of extra allocations. Need to look into this.
+				$self->map_memory->[$y]->[$x] = $self->room->map->[$y]->[$x]->clone;
+			}
+		}
+	}
+}
+
+sub remember_map
+{
+	my $self = shift;
+	for(my $y = 0; $y < $self->room->height; ++$y)
+	{
+		for(my $x = 0; $x < $self->room->width; ++$x)
+		{
+			if ($x == $self->x && $y == $self->y)
+			{
+				print "@";
+			}
+			else
+			{
+				print $self->map_memory->[$y]->[$x]->char;
+			}
+		}
+		print "\n";
+	}
 }
 
 sub look
