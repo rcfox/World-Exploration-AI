@@ -5,7 +5,7 @@ has 'x' => (isa => 'Int', is => 'rw');
 has 'y' => (isa => 'Int', is => 'rw');
 has 'facing' => (isa => 'Num', is => 'rw', default => 0);
 
-has 'sight_range' => (isa => 'Int', is => 'rw', default => 5);
+has 'sight_range' => (isa => 'Int', is => 'rw', default => 10);
 
 has 'name' => (isa => 'Str', is => 'rw');
 
@@ -79,7 +79,8 @@ sub fov
 		}
 	}
 
-	for(my $i = 0; $i < 360; $i += 1)
+	for(my $i = 0 ; $i < 360; $i += 1)
+#	my $i = 0;
 	{
 		my $x = cos($i*0.01745);
 		my $y = sin($i*0.01745);
@@ -100,14 +101,18 @@ sub cast_ray
 	{
 		my $rx = int(sprintf("%.0f",$ox));
 		my $ry = int(sprintf("%.0f",$oy));
-		$map->[$rx+$self->sight_range-1][$ry+$self->sight_range-1] = 1;
+
+		$map->[$rx+$self->sight_range][$ry+$self->sight_range] = 1;
+		if($self->room->check_opaque($px+$rx,$py+$ry) && ($rx != 0 || $ry != 0))
+		{
+			return $map;
+		}
 		my $c = $self->room->check_opaque($px+$rx,$py+$ry);
 		my $b = ($rx ? 1 : 0);
 		my $d = ($ry ? 1 : 0);
 		
 		$ox += $x;
 		$oy += $y;
-		last if($self->room->check_opaque($px+$rx,$py+$ry) && ($rx || $ry));
 	}
 
 	return $map;
