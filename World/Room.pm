@@ -27,6 +27,13 @@ has 'map' =>
 	    is => 'rw',
 	);
 
+has 'entities' =>
+    (
+	    isa => 'ArrayRef[World::Entity]',
+	    is => 'rw',
+	    default => sub{[]},
+	);
+
 sub from_string
 {
 	my $self = shift;
@@ -40,8 +47,7 @@ sub from_string
 		for(my $x = 0; $x < @row_split; ++$x)
 		{
 			my $clone = $self->map_legend->{$row_split[$x]}->clone();
-			$clone->x($x);
-			$clone->y($y);
+			$clone->place($x,$y);
 			push @row, $clone;
 		}
 		push @map, \@row;
@@ -63,6 +69,32 @@ sub draw
 		}
 		print "\n";
 	}
+}
+
+sub update
+{
+	my $self = shift;
+	for (my $y = 0; $y < $self->height; ++$y)
+	{
+		for(my $x = 0; $x < $self->width; ++$x)
+		{
+			$self->map->[$y]->[$x]->draw();;
+		}
+	}
+
+	my @entities = @{$self->entities};
+	foreach (@entities)
+	{
+		$_->draw();
+	}
+}
+
+sub add_entity
+{
+	my $self = shift;
+	my $entity = shift;
+
+	push @{$self->entities},$entity;
 }
 
 sub add_feature

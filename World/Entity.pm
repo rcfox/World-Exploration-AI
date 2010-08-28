@@ -1,8 +1,8 @@
 package World::Entity;
 use Moose;
 
-has 'x' => (isa => 'Int', is => 'rw');
-has 'y' => (isa => 'Int', is => 'rw');
+with 'Positionable', 'Drawable';
+
 has 'facing' => (isa => 'Num', is => 'rw', default => 0);
 
 has 'sight_range' => (isa => 'Int', is => 'rw', default => 10);
@@ -42,8 +42,7 @@ sub move
 
 	if ($self->room->check_solid($nx,$ny) == 0)
 	{
-		$self->x($nx);
-		$self->y($ny);
+		$self->place($nx,$ny);
 		$self->facing(atan2($dy,$dx)*180/3.14159);
 		return 1;
 	}
