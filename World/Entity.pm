@@ -190,7 +190,7 @@ sub update
 	foreach (@entities)
 	{
 		my ($x,$y) = ($_->x,$_->y);
-		if (!$self->map_memory->[$y]->[$x]->compare($nothing))
+		if ($self->map_memory->[$y]->[$x] && !$self->map_memory->[$y]->[$x]->compare($nothing))
 		{
 			$_->draw();
 		}
