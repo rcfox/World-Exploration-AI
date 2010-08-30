@@ -40,32 +40,13 @@ has 'path' =>
 	    default => sub{[]},
 	);
 
-sub learn_map
+override 'manage_map_memory' => sub
 {
 	my $self = shift;
-	my @map = @{$self->fov};
-
-	for(my $y = $self->y-($self->sight_range-1); $y < $self->y+($self->sight_range-1); ++$y)
-	{
-		for(my $x = $self->x-($self->sight_range-1); $x < $self->x+($self->sight_range-1); ++$x)
-		{
-			my $ty = $y - ($self->y-$self->sight_range);
-			my $tx = $x - ($self->x-$self->sight_range);
-
-			if ($x >= 0 && $y >= 0 && $map[$tx][$ty])
-			{
-				my $memory = $self->map_memory->[$y]->[$x];
-				my $actual = $self->room->map->[$y]->[$x];
-
-				if (!$memory->compare($actual))
-				{
-					$self->map_memory->[$y]->[$x] = $actual->clone;
-				}
-				$self->passability_map->set_passability($x,$y,!$self->room->check_solid($x,$y));
-			}
-		}
-	}
-}
+	my ($x,$y) = @_;
+	$self->passability_map->set_passability($x,$y,!$self->room->check_solid($x,$y));
+	$self->passability_map->set_passability($x,$y,1) if ($self->x == $x && $self->y == $y);
+};
 
 sub move_to
 {
