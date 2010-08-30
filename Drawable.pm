@@ -12,7 +12,7 @@ has 'gfx_rect' =>
         isa => 'SDL::Rect',
         lazy => 1,
         default => sub { my $self = shift;
-                         new SDL::Rect($self->x*32,$self->y*32,32,32);
+                         new SDL::Rect($self->x*16,$self->y*16,16,16);
                        },
     );
 
