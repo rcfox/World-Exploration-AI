@@ -125,4 +125,11 @@ sub check_opaque
 	return $self->map->[$y]->[$x]->opaque;
 }
 
+sub check_bounds
+{
+	my $self = shift;
+	my ($x,$y) = @_;
+	return ($x >= 0 && $y >= 0 && $x < $self->width && $y < $self->height);
+}
+
 1;

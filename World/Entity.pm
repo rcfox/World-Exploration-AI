@@ -83,7 +83,7 @@ sub learn_map
 			my $ty = $y - ($self->y-$self->sight_range);
 			my $tx = $x - ($self->x-$self->sight_range);
 
-			if ($x >= 0 && $y >= 0 && $x < $self->room->width && $y < $self->room->height && $map[$tx][$ty])
+			if ($self->room->check_bounds($x,$y) && $map[$tx][$ty])
 			{
 				my $memory = $self->map_memory->[$y]->[$x];
 				my $actual = $self->room->map->[$y]->[$x];
@@ -143,7 +143,7 @@ sub look
 			{
 				my $tx = $x-$self->x+$self->sight_range;
 				my $ty = $y-$self->y+$self->sight_range;
-				if ($tx > 0 && $ty > 0 && $map[$tx][$ty])
+				if ($tx >= 0 && $ty >= 0 && $map[$tx][$ty])
 				{
 					print $self->room->map->[$y]->[$x]->char;
 				}
