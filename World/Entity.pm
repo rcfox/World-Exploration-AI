@@ -1,15 +1,22 @@
 package World::Entity;
 use Moose;
 
-with 'Positionable', 'Drawable';
+with 'Positionable', 'Drawable', 'Controllable';
 
 has 'facing' => (isa => 'Num', is => 'rw', default => 0);
 
-has 'sight_range' => (isa => 'Int', is => 'rw', default => 5);
+has 'sight_range' => (isa => 'Int', is => 'rw', default => 11);
 
 has 'name' => (isa => 'Str', is => 'rw');
 
 has 'room' => (isa => 'World::Room', is => 'rw');
+
+has 'seen_entities' =>
+    (
+	    isa => 'ArrayRef[World::Entity]',
+	    is => 'rw',
+	    default => sub{[]},
+	);
 
 has 'map_memory' =>
     (
@@ -56,6 +63,19 @@ sub learn_map
 	my $self = shift;
 	my @map = @{$self->fov};
 
+	my @entities = grep
+	{
+		my $ty = $_->y - ($self->y-$self->sight_range);
+		my $tx = $_->x - ($self->x-$self->sight_range);
+		my $return = 0;
+		if($tx >= 0 && $tx < @map && $ty >= 0 && $ty < @{$map[$tx]})
+		{
+			$return = $map[$tx][$ty];
+		}
+		$return;
+	} @{$self->room->entities};
+	$self->seen_entities(\@entities);
+
 	for(my $y = $self->y-($self->sight_range-1); $y < $self->y+($self->sight_range-1); ++$y)
 	{
 		for(my $x = $self->x-($self->sight_range-1); $x < $self->x+($self->sight_range-1); ++$x)
@@ -72,9 +92,18 @@ sub learn_map
 				{
 					$self->map_memory->[$y]->[$x] = $actual->clone;
 				}
+
+				# Used by child classes to do anything extra with the map memory, like
+				# storing a passability map for A*.
+				$self->manage_map_memory($x,$y);
 			}
 		}
 	}
+}
+
+sub manage_map_memory
+{
+
 }
 
 sub remember_map
@@ -140,7 +169,7 @@ sub fov
 		}
 	}
 	
-	for(my $i = 0; $i < 360; $i += 1)
+	for(my $i = 0; $i < 360; $i += 10)
 	{
 		my $x = cos($i*0.01745);
 		my $y = sin($i*0.01745);
@@ -187,13 +216,9 @@ sub update
 
 	my @entities = @{$self->room->entities};
 	my $nothing = World::Feature->new(char=>' ',surface=>$self->surface,gfx_color=>0);
-	foreach (@entities)
+	foreach (@{$self->seen_entities})
 	{
-		my ($x,$y) = ($_->x,$_->y);
-		if ($self->map_memory->[$y]->[$x] && !$self->map_memory->[$y]->[$x]->compare($nothing))
-		{
-			$_->draw();
-		}
+		$_->draw();
 	}
 }
 
