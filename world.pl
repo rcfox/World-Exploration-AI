@@ -1,7 +1,6 @@
 #!/usr/bin/perl
 use strict;
 use warnings;
-use 5.010;
 
 sub random_int_between {
 	my($min, $max) = @_;
@@ -10,6 +9,19 @@ sub random_int_between {
 	($min, $max) = ($max, $min)  if  $min > $max;
 	return $min + int rand(1 + $max - $min);
 }
+
+sub random_free_coordinates
+{
+	my $room = shift;
+	my ($x,$y);
+	do
+	{
+		$x = random_int_between(0,$room->width);
+		$y = random_int_between(0,$room->height);
+	} while($room->check_solid($x,$y));
+	return ($x,$y);
+}
+
 
 use SDLx::App;
 use SDL::Event;
@@ -69,17 +81,19 @@ MAP
 for(1..5)
 {
 	my ($r,$g,$b) = (random_int_between(0,255),random_int_between(0,255),random_int_between(0,255));
-	$room->add_entity(World::Explorer->new(x=>1, y=>random_int_between(1,$room->height-2),
+	my ($x,$y) = random_free_coordinates($room);
+	$room->add_entity(World::Explorer->new(x=>$x, y=>$y,
 	                                       name=>"Explorer".$_,room=>$room,
 	                                       surface=>$app,gfx_color=>SDL::Video::map_RGB($app->format(),$r,$g,$b),
 	                                       go_x=>48,go_y=>2));
 }
 
-for(1..0)
+for(1..5)
 {
-	$room->add_entity(World::Entity->new(x=>random_int_between(1,$room->width), y=>random_int_between(1,$room->height),
-	                                       name=>"Entity".$_,room=>$room,
-	                                       surface=>$app,gfx_color=>SDL::Video::map_RGB($app->format(),0,0,255)));
+	my ($x,$y) = random_free_coordinates($room);
+	$room->add_entity(World::Entity->new(x=>$x,y=>$y,
+	                                     name=>"Entity".$_,room=>$room,
+	                                     surface=>$app,gfx_color=>SDL::Video::map_RGB($app->format(),0,0,255)));
 }
 
 my $count = 1;
