@@ -32,7 +32,7 @@ my $app = SDLx::App->new();
 
 $app->add_event_handler( sub { my $e = shift; return if ( $e->type == SDL_QUIT ); return 1 } );
 
-$app->add_show_handler( sub { $to_draw->update(); } );
+$app->add_show_handler( sub { $app->draw_rect(undef,0); $to_draw->update(); } );
 $app->add_show_handler( sub { $app->update(); } ); # This goes last!
 
 use World::Room;

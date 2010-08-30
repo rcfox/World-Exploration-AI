@@ -5,7 +5,8 @@ with 'Positionable', 'Drawable', 'Controllable';
 
 has 'facing' => (isa => 'Num', is => 'rw', default => 0);
 
-has 'sight_range' => (isa => 'Int', is => 'rw', default => 11);
+has 'sight_range' => (isa => 'Int', is => 'rw', default => 7);
+has 'sight_angle' => (isa => 'Int', is => 'rw', default => 120);
 
 has 'name' => (isa => 'Str', is => 'rw');
 
@@ -48,10 +49,10 @@ sub move
 	my ($dx,$dy) = @_;
 	my ($nx,$ny) = ($self->x+$dx,$self->y+$dy);
 
+	$self->facing(atan2($dy,$dx)*180/3.14159);
 	if ($self->room->check_solid($nx,$ny) == 0)
 	{
-		$self->place($nx,$ny);
-		$self->facing(atan2($dy,$dx)*180/3.14159);
+		$self->place($nx,$ny);		
 		return 1;
 	}
 
@@ -169,7 +170,7 @@ sub fov
 		}
 	}
 	
-	for(my $i = 0; $i < 360; $i += 10)
+	for(my $i = -$self->sight_angle/2 + $self->facing; $i < $self->sight_angle/2 + $self->facing; $i += 5)
 	{
 		my $x = cos($i*0.01745);
 		my $y = sin($i*0.01745);
@@ -221,5 +222,22 @@ sub update
 		$_->draw();
 	}
 }
+
+after 'draw' => sub
+{
+	my $self = shift;
+	my ($x,$y) = ($self->x*16+8,$self->y*16+8);
+	my $length = $self->sight_range*16/sqrt(2);
+	my $deg2rad = 3.14159/180;
+	my $maxa = $self->sight_angle/2 + $self->facing;
+	my $mina = -$self->sight_angle/2 + $self->facing;
+	my $line1 = [$length*cos($mina*$deg2rad)+$x,$length*sin($mina*$deg2rad)+$y];
+	my $line2 = [$length*cos($maxa*$deg2rad)+$x,$length*sin($maxa*$deg2rad)+$y];
+	my $white = SDL::Video::map_RGB($self->surface->format(),255,255,255);
+	
+	$self->surface->draw_line([$x,$y],$line1,$white,0);
+	$self->surface->draw_line([$x,$y],$line2,$white,0);
+	SDL::GFX::Primitives::arc_color( $self->surface, $x, $y, $length, $mina, $maxa, $white);
+};
 
 1;
