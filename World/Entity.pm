@@ -107,55 +107,37 @@ sub manage_map_memory
 
 }
 
-sub remember_map
-{
-	my $self = shift;
-	for(my $y = 0; $y < $self->room->height; ++$y)
-	{
-		for(my $x = 0; $x < $self->room->width; ++$x)
-		{
-			if ($x == $self->x && $y == $self->y)
-			{
-				print "@";
-			}
-			else
-			{
-				print $self->map_memory->[$y]->[$x]->char;
-			}
-		}
-		print "\n";
-	}
-}
-
 sub look
 {
 	my $self = shift;
 	my @map = @{$self->fov};
 
+	my $rect = SDL::Rect->new(0,0,16,16);
+	my $color = 0;
 	for(my $y = 0; $y < $self->room->height; ++$y)
 	{
 		for(my $x = 0; $x < $self->room->width; ++$x)
 		{
-			if ($x == $self->x && $y == $self->y)
+			$rect->x($x*16);
+			$rect->y($y*16);
+
+			my $tx = $x-$self->x+$self->sight_range;
+			my $ty = $y-$self->y+$self->sight_range;
+			if ($tx >= 0 && $ty >= 0 && $map[$tx][$ty])
 			{
-				print "@";
+				$color = $self->room->map->[$y]->[$x]->gfx_color;
 			}
 			else
 			{
-				my $tx = $x-$self->x+$self->sight_range;
-				my $ty = $y-$self->y+$self->sight_range;
-				if ($tx >= 0 && $ty >= 0 && $map[$tx][$ty])
-				{
-					print $self->room->map->[$y]->[$x]->char;
-				}
-				else
-				{
-					print " ";
-				}
+				$color = 0;
 			}
-		}
-		print "\n";
-	}	
+			$self->surface->draw_rect($rect,$color);
+		}		
+	}
+	foreach (@{$self->seen_entities})
+	{
+		$_->draw();
+	}
 }
 
 sub fov

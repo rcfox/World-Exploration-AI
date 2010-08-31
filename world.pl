@@ -32,7 +32,7 @@ my $app = SDLx::App->new();
 
 $app->add_event_handler( sub { my $e = shift; return if ( $e->type == SDL_QUIT ); return 1 } );
 
-$app->add_show_handler( sub { $app->draw_rect(undef,0); $to_draw->update(); } );
+$app->add_show_handler( sub { $app->draw_rect(undef,0); $to_draw->look(); } );
 $app->add_show_handler( sub { $app->update(); } ); # This goes last!
 
 use World::Room;
@@ -107,13 +107,12 @@ foreach my $entity (grep {$_->isa('World::Explorer')} @{$room->entities})
 		                       $entity->dt($entity->dt+$dt);
 		                       if ($entity->dt >= 100)
 		                       {			                       
-			                       $entity->learn_map();
-
 			                       if(!$entity->move_to($entity->go_x,$entity->go_y))
 			                       {
 				                       $entity->go_x(random_int_between(1,$room->width-2));
 				                       $entity->go_y(random_int_between(1,$room->height-2));
 			                       }
+			                       $entity->learn_map();
 			                       $entity->dt(0);
 		                       }
 	                       });
@@ -127,10 +126,8 @@ foreach my $entity (grep {!$_->isa('World::Explorer')} @{$room->entities})
 		                       $entity->dt($entity->dt+$dt);
 		                       if ($entity->dt >= 100)
 		                       {			                       
-			                       $entity->learn_map();
-
 			                       $entity->move(random_int_between(-1,1),random_int_between(-1,1));
-
+			                       $entity->learn_map();
 			                       $entity->dt(0);
 		                       }
 	                       });
