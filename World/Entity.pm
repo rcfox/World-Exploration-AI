@@ -130,6 +130,13 @@ sub look
 			else
 			{
 				$color = 0;
+				my $hex = sprintf("%x",$self->map_memory->[$y]->[$x]->gfx_color);
+				if ($hex ne "0")
+				{
+					my ($r,$g,$b) = (hex(substr($hex,0,2)), hex(substr($hex,2,2)), hex(substr($hex,4,2)));
+					$color = hex(sprintf("%x%x%x",$r/2,$g/2,$b/2));
+					             
+				}
 			}
 			$self->surface->draw_rect($rect,$color);
 		}		
@@ -152,7 +159,7 @@ sub fov
 		}
 	}
 	
-	for(my $i = -$self->sight_angle/2 + $self->facing; $i < $self->sight_angle/2 + $self->facing; $i += 5)
+	for(my $i = -$self->sight_angle/2 + $self->facing; $i <= $self->sight_angle/2 + $self->facing; $i += 5)
 	{
 		my $x = cos($i*0.01745);
 		my $y = sin($i*0.01745);
