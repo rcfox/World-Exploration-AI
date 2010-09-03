@@ -1,6 +1,7 @@
 package World::Room;
 use Moose;
 use World::Feature;
+use Utility;
 
 has 'height' =>
     (
@@ -130,6 +131,18 @@ sub check_bounds
 	my $self = shift;
 	my ($x,$y) = @_;
 	return ($x >= 0 && $y >= 0 && $x < $self->width && $y < $self->height);
+}
+
+sub random_free_coordinates
+{
+	my $self = shift;
+	my ($x,$y);
+	do
+	{
+		$x = random_int_between(0,$self->width);
+		$y = random_int_between(0,$self->height);
+	} while ($self->check_solid($x,$y));
+	return ($x,$y);
 }
 
 1;
