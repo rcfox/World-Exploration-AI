@@ -18,7 +18,7 @@ sub random_free_coordinates
 	{
 		$x = random_int_between(0,$room->width);
 		$y = random_int_between(0,$room->height);
-	} while($room->check_solid($x,$y));
+	} while ($room->check_solid($x,$y));
 	return ($x,$y);
 }
 
@@ -27,7 +27,7 @@ use SDLx::App;
 use SDL::Event;
 
 my $to_draw;
-my $app = SDLx::App->new();
+my $app = SDLx::App->new(dt=>100);
 
 
 $app->add_event_handler( sub { my $e = shift; return if ( $e->type == SDL_QUIT ); return 1 } );
@@ -94,7 +94,7 @@ $room->from_string(<<MAP);
 ##################################################
 MAP
 
-for(1..5)
+for (1..5)
 {
 	my ($r,$g,$b) = (random_int_between(0,255),random_int_between(0,255),random_int_between(0,255));
 	my ($x,$y) = random_free_coordinates($room);
@@ -104,7 +104,7 @@ for(1..5)
 	                                       go_x=>48,go_y=>2));
 }
 
-for(1..5)
+for (1..5)
 {
 	my ($x,$y) = random_free_coordinates($room);
 	$room->add_entity(World::Entity->new(x=>$x,y=>$y,
@@ -119,18 +119,12 @@ foreach my $entity (grep {$_->isa('World::Explorer')} @{$room->entities})
 {
 	$app->add_move_handler(sub 
 	                       {
-		                       my $dt = shift;
-		                       $entity->dt($entity->dt+$dt);
-		                       if ($entity->dt >= 100)
-		                       {			                       
-			                       if(!$entity->move_to($entity->go_x,$entity->go_y))
-			                       {
-				                       $entity->go_x(random_int_between(1,$room->width-2));
-				                       $entity->go_y(random_int_between(1,$room->height-2));
-			                       }
-			                       $entity->learn_map();
-			                       $entity->dt(0);
+		                       if (!$entity->move_to($entity->go_x,$entity->go_y))
+		                       {
+			                       $entity->go_x(random_int_between(1,$room->width-2));
+			                       $entity->go_y(random_int_between(1,$room->height-2));
 		                       }
+		                       $entity->learn_map();
 	                       });
 }
 
@@ -138,17 +132,10 @@ foreach my $entity (grep {!$_->isa('World::Explorer')} @{$room->entities})
 {
 	$app->add_move_handler(sub 
 	                       {
-		                       my $dt = shift;
-		                       $entity->dt($entity->dt+$dt);
-		                       if ($entity->dt >= 100)
-		                       {			                       
-			                       $entity->move(random_int_between(-1,1),random_int_between(-1,1));
-			                       $entity->learn_map();
-			                       $entity->dt(0);
-		                       }
+		                       $entity->move(random_int_between(-1,1),random_int_between(-1,1));
+		                       $entity->learn_map();
 	                       });
 }
-
 
 $app->add_event_handler(sub
                         {
