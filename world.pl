@@ -1,6 +1,10 @@
 #!/usr/bin/perl
 use strict;
 use warnings;
+use Getopt::Long;
+
+my $save_screens;
+GetOptions('save' => \$save_screens);
 
 sub random_int_between {
 	my($min, $max) = @_;
@@ -148,5 +152,15 @@ $app->add_event_handler(sub
 	                        }
 	                        return 1
                         });
+
+my $save_count = 0;
+if ($save_screens)
+{
+	$app->add_move_handler(sub 
+	                       {
+		                       SDL::Video::save_BMP( $app, "screens/screen".$save_count++.".bmp" );
+	                       });
+}
+
 
 $app->run();
