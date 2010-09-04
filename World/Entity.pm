@@ -63,31 +63,36 @@ sub learn_map
 {
 	my $self = shift;
 	my @map = @{$self->fov};
+	my $sight = $self->sight_range;
+	my $room = $self->room;
+
+	my $sx = $self->x;
+	my $sy = $self->y;
 
 	my @entities = grep
 	{
-		my $ty = $_->y - ($self->y-$self->sight_range);
-		my $tx = $_->x - ($self->x-$self->sight_range);
+		my $ty = $_->y - ($sy-$sight);
+		my $tx = $_->x - ($sx-$sight);
 		my $return = 0;
 		if($tx >= 0 && $tx < @map && $ty >= 0 && $ty < @{$map[$tx]})
 		{
 			$return = $map[$tx][$ty];
 		}
 		$return;
-	} @{$self->room->entities};
+	} @{$room->entities};
 	$self->seen_entities(\@entities);
 
-	for(my $y = $self->y-($self->sight_range-1); $y < $self->y+($self->sight_range-1); ++$y)
+	for(my $y = $sy-($sight-1); $y < $sy+($sight-1); ++$y)
 	{
-		for(my $x = $self->x-($self->sight_range-1); $x < $self->x+($self->sight_range-1); ++$x)
+		for(my $x = $sx-($sight-1); $x < $sx+($sight-1); ++$x)
 		{
-			my $ty = $y - ($self->y-$self->sight_range);
-			my $tx = $x - ($self->x-$self->sight_range);
+			my $ty = $y - ($sy-$sight);
+			my $tx = $x - ($sx-$sight);
 
-			if ($self->room->check_bounds($x,$y) && $map[$tx][$ty])
+			if ($room->check_bounds($x,$y) && $map[$tx][$ty])
 			{
 				my $memory = $self->map_memory->[$y]->[$x];
-				my $actual = $self->room->map->[$y]->[$x];
+				my $actual = $room->map->[$y]->[$x];
 
 				if (!$memory->compare($actual))
 				{
@@ -112,33 +117,40 @@ sub look
 	my $self = shift;
 	my @map = @{$self->fov};
 
+	my $map_memory = $self->map_memory;
+	my $sight = $self->sight_range;
+	my $surface = $self->surface;
+
+	my $room_map = $self->room->map;
+	my $room_width = $self->room->width;
+	my $room_height = $self->room->height;
+
+	my $sx = $self->x;
+	my $sy = $self->y;
+
 	my $rect = SDL::Rect->new(0,0,16,16);
 	my $color = 0;
-	for(my $y = 0; $y < $self->room->height; ++$y)
+	for(my $y = 0; $y < $room_height; ++$y)
 	{
-		for(my $x = 0; $x < $self->room->width; ++$x)
+		for(my $x = 0; $x < $room_width; ++$x)
 		{
 			$rect->x($x*16);
 			$rect->y($y*16);
 
-			my $tx = $x-$self->x+$self->sight_range;
-			my $ty = $y-$self->y+$self->sight_range;
+			my $tx = $x-$sx+$sight;
+			my $ty = $y-$sy+$sight;
 			if ($tx >= 0 && $ty >= 0 && $map[$tx][$ty])
 			{
-				$color = $self->room->map->[$y]->[$x]->gfx_color;
+				$color = $room_map->[$y]->[$x]->gfx_color;
 			}
 			else
 			{
-				$color = 0;
-				my $hex = sprintf("%x",$self->map_memory->[$y]->[$x]->gfx_color);
-				if ($hex ne "0")
-				{
-					my ($r,$g,$b) = (hex(substr($hex,0,2)), hex(substr($hex,2,2)), hex(substr($hex,4,2)));
-					$color = hex(sprintf("%x%x%x",$r/2,$g/2,$b/2));
-					             
-				}
+				my $c = $map_memory->[$y]->[$x]->gfx_color;
+				my ($r,$g,$b) = ( (($c >> 16)&0xFF)/2, (($c >> 8)&0xFF)/2, ($c&0xFF)/2 );
+				$color = ($r << 16) | ($g << 8) | $b;
+
 			}
-			$self->surface->draw_rect($rect,$color);
+			$surface->draw_rect($rect,$color);
 		}		
 	}
 	foreach (@{$self->seen_entities})
@@ -151,9 +163,11 @@ sub fov
 {
 	my $self = shift;
 	my $map = [];
-	for(my $y = 0; $y < 2*$self->sight_range-1; ++$y)
+	my $sight = $self->sight_range;
+	
+	for(my $y = 0; $y < 2*$sight-1; ++$y)
 	{
-		for(my $x = 0; $x < 2*$self->sight_range-1; ++$x)
+		for(my $x = 0; $x < 2*$sight-1; ++$x)
 		{
 			$map->[$x][$y] = 0;
 		}
@@ -175,14 +189,15 @@ sub cast_ray
 	my ($x,$y) = @_;
 	my ($px,$py) = ($self->x, $self->y);
 	my ($ox,$oy) = (0,0);
+	my $sight = $self->sight_range;
 
-	for(my $i = 0; $i < $self->sight_range; ++$i)
+	for(my $i = 0; $i < $sight; ++$i)
 	{
 		# Perl's method for rounding isn't the most intuitive...
 		my $rx = int(sprintf("%.0f",$ox));
 		my $ry = int(sprintf("%.0f",$oy));
 
-		$map->[$rx+$self->sight_range][$ry+$self->sight_range] = 1;
+		$map->[$rx+$sight][$ry+$sight] = 1;
 
 		# Extend the ray
 		$ox += $x;
