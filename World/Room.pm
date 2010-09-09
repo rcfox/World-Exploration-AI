@@ -35,6 +35,14 @@ has 'entities' =>
 	    default => sub{[]},
 	);
 
+has 'items' =>
+    (
+	    isa => 'ArrayRef[World::Item]',
+	    is => 'rw',
+	    default => sub{[]},
+	);
+
+
 sub from_string
 {
 	my $self = shift;
@@ -96,6 +104,14 @@ sub add_entity
 	my $entity = shift;
 
 	push @{$self->entities},$entity;
+}
+
+sub add_item
+{
+	my $self = shift;
+	my $item = shift;
+
+	push @{$self->items},$item;
 }
 
 sub add_feature

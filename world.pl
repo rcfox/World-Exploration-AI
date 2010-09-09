@@ -10,9 +10,19 @@ use SDL::Event;
 
 use World::Room::Demo;
 use World::Explorer;
+use World::Item;
 
 # Initialize the room and the inhabitants.
 my $room = World::Room::Demo->new();
+
+for (1..5)
+{
+	my ($r,$g,$b) = (255,0,0);
+	my ($x,$y) = $room->random_free_coordinates();
+	$room->add_item(World::Item->new(x=>$x, y=>$y,
+	                                 name=>"Item".$_,room=>$room,
+	                                 gfx_color=>rgb2c($r,$g,$b)));
+}
 
 for (1..5)
 {
@@ -20,7 +30,7 @@ for (1..5)
 	my ($x,$y) = $room->random_free_coordinates();
 	$room->add_entity(World::Explorer->new(x=>$x, y=>$y,
 	                                       name=>"Explorer".$_,room=>$room,
-	                                       gfx_color=>hex(sprintf("%x%x%x",$r,$g,$b)),
+	                                       gfx_color=>rgb2c($r,$g,$b),
 	                                       go_x=>48,go_y=>2));
 }
 
@@ -44,6 +54,11 @@ $app->add_show_handler(sub
                        });
 
 $app->add_show_handler(sub { $app->update(); }); # This goes last!
+
+foreach my $item (@{$room->items})
+{
+	$item->surface($app);
+}
 
 foreach my $entity (@{$room->entities})
 {

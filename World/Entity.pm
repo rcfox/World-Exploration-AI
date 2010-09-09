@@ -1,5 +1,6 @@
 package World::Entity;
 use Moose;
+use Utility;
 
 with 'Positionable', 'Drawable', 'Controllable';
 
@@ -15,6 +16,13 @@ has 'room' => (isa => 'World::Room', is => 'rw');
 has 'seen_entities' =>
     (
 	    isa => 'ArrayRef[World::Entity]',
+	    is => 'rw',
+	    default => sub{[]},
+	);
+
+has 'seen_items' =>
+    (
+	    isa => 'ArrayRef[World::Item]',
 	    is => 'rw',
 	    default => sub{[]},
 	);
@@ -82,6 +90,19 @@ sub learn_map
 	} @{$room->entities};
 	$self->seen_entities(\@entities);
 
+	my @items = grep
+	{
+		my $ty = $_->y - ($sy-$sight);
+		my $tx = $_->x - ($sx-$sight);
+		my $return = 0;
+		if($tx >= 0 && $tx < @map && $ty >= 0 && $ty < @{$map[$tx]})
+		{
+			$return = $map[$tx][$ty];
+		}
+		$return;
+	} @{$room->items};
+	$self->seen_items(\@items);
+
 	for(my $y = $sy-($sight-1); $y < $sy+($sight-1); ++$y)
 	{
 		for(my $x = $sx-($sight-1); $x < $sx+($sight-1); ++$x)
@@ -146,14 +167,18 @@ sub look
 			else
 			{
 				my $c = $map_memory->[$y]->[$x]->gfx_color;
-				my ($r,$g,$b) = ( (($c >> 16)&0xFF)/2, (($c >> 8)&0xFF)/2, ($c&0xFF)/2 );
-				$color = ($r << 16) | ($g << 8) | $b;
+				my ($r,$g,$b) = c2rgb($c);
+				$color = rgb2c($r/2,$g/2,$b/2);
 
 			}
 			$surface->draw_rect($rect,$color);
 		}		
 	}
 	foreach (@{$self->seen_entities})
+	{
+		$_->draw();
+	}
+	foreach (@{$self->seen_items})
 	{
 		$_->draw();
 	}
