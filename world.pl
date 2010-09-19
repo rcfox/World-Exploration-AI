@@ -46,6 +46,28 @@ $app->add_event_handler(sub
 	                        return 1
                         });
 
+$app->add_event_handler(sub
+                        {
+	                        my $e = shift;
+	                        if ( $e->type == SDL_MOUSEBUTTONUP )
+	                        {
+		                        my ($mask,$x,$y) = @{ SDL::Events::get_mouse_state( ) };
+		                        $x = int($x / 16);
+		                        $y = int($y / 16);
+
+		                        if ($room->map->[$y]->[$x]->char eq '#')
+		                        {
+			                        $room->map->[$y]->[$x] = $room->map_legend->{'.'}->clone();
+		                        }
+		                        else
+		                        {
+			                        $room->map->[$y]->[$x] = $room->map_legend->{'#'}->clone();
+
+		                        }
+	                        }
+	                        return 1
+                        });
+
 # Update the screen
 $app->add_show_handler(sub
                        {
