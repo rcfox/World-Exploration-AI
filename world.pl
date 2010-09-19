@@ -15,7 +15,7 @@ use World::Item;
 # Initialize the room and the inhabitants.
 my $room = World::Room::Demo->new();
 
-for (1..5)
+for (1..15)
 {
 	my ($r,$g,$b) = (255,0,0);
 	my ($x,$y) = $room->random_free_coordinates();
@@ -51,6 +51,7 @@ $app->add_show_handler(sub
                        {
 	                       $app->draw_rect(undef,0);
 	                       $to_draw->look();
+	                       #$to_draw->fov_test();
                        });
 
 $app->add_show_handler(sub { $app->update(); }); # This goes last!
