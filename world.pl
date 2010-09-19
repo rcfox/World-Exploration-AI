@@ -62,7 +62,6 @@ $app->add_event_handler(sub
 		                        else
 		                        {
 			                        $room->map->[$y]->[$x] = $room->map_legend->{'#'}->clone();
-
 		                        }
 	                        }
 	                        return 1
