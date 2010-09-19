@@ -15,7 +15,7 @@ use World::Item;
 # Initialize the room and the inhabitants.
 my $room = World::Room::Demo->new();
 
-for (1..15)
+for (1..5)
 {
 	my ($r,$g,$b) = (255,0,0);
 	my ($x,$y) = $room->random_free_coordinates();
@@ -24,7 +24,7 @@ for (1..15)
 	                                 gfx_color=>rgb2c($r,$g,$b)));
 }
 
-for (1..5)
+for (1..25)
 {
 	my ($r,$g,$b) = (random_int_between(0,255),random_int_between(0,255),random_int_between(0,255));
 	my ($x,$y) = $room->random_free_coordinates();

@@ -8,7 +8,7 @@ with 'Positionable', 'Drawable', 'Controllable';
 
 has 'facing' => (isa => 'Num', is => 'rw', default => 0);
 
-has 'sight_range' => (isa => 'Int', is => 'rw', default => 7);
+has 'sight_range' => (isa => 'Int', is => 'rw', default => 5);
 has 'sight_angle' => (isa => 'Int', is => 'rw', default => 120);
 
 has 'name' => (isa => 'Str', is => 'rw');

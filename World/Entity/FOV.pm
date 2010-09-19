@@ -1,6 +1,6 @@
 package World::Entity::FOV;
 use Memoize;
-use Storable qw(dclone);
+use Storable qw(thaw freeze);
 
 sub check_fov
 {
@@ -23,12 +23,12 @@ sub check_fov
 
 	my $start = "$sight_range,$sight_range";
 	
-	my $tree = dclone(fov($sight_range,$sight_angle,$facing));
+	my $tree = thaw(fov($sight_range,$sight_angle,$facing));
 
 	$map[$sight_range][$sight_range] = 1;
 	foreach(keys %{$tree->{$start}{child}})
 	{
-		update_fov_map(\@map,$tree,$_,$room,$sight_range,$entity->x,$entity->y);
+		update_fov_map(\@map,$tree,$_,$room,$sight_range,$ex,$ey);
 	}
 	
 	# for my $k (keys %tree)
@@ -44,12 +44,7 @@ sub check_fov
 
 sub update_fov_map
 {
-	my $map = shift;
-	my $tree = shift;
-	my $coord = shift;
-	my $room = shift;
-	my $sight_range = shift;
-	my ($ex,$ey) = @_;
+	my ($map,$tree,$coord,$room,$sight_range,$ex,$ey) = @_;
 	my ($x,$y) = ($tree->{$coord}{x},$tree->{$coord}{y});
 	my ($tx,$ty) = ($ex+$x-$sight_range,$ey+$y-$sight_range);
 
@@ -57,7 +52,7 @@ sub update_fov_map
 
 	if ($room->check_opaque($tx,$ty))
 	{
-		$tree->{$coord}{child} = {};		
+		$tree->{$coord}{child} = {};
 	}
 	else
 	{
@@ -68,7 +63,7 @@ sub update_fov_map
 	}
 }
 
-#memoize('fov');
+memoize('fov');
 sub fov
 {
 	my $sight_range = shift;
@@ -90,7 +85,7 @@ sub fov
 		$tree{$_}{y} = $y;
 	}
 
-	return \%tree;
+	return freeze(\%tree);
 }
 
 sub cast_ray
