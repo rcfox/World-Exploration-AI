@@ -73,7 +73,7 @@ sub learn_map
 {
 	my $self = shift;
 	my $sight = $self->sight_range;
-	my @map = @{World::Entity::FOV::check_fov($sight,$self->sight_angle, $self->facing,$self)};#@{$self->fov};
+	my @map = @{World::Entity::FOV::check_fov($self)};#@{$self->fov};
 	my $room = $self->room;
 
 	my $sx = $self->x;
@@ -139,7 +139,7 @@ sub look
 {
 	my $self = shift;
 	my $sight = $self->sight_range;
-	my @map = @{World::Entity::FOV::check_fov($sight,$self->sight_angle, $self->facing,$self)};#@{$self->fov};
+	my @map = @{World::Entity::FOV::check_fov($self)};#@{$self->fov};
 
 	my $map_memory = $self->map_memory;
 	my $surface = $self->surface;
@@ -210,7 +210,7 @@ sub fov_test
 {
 	my $self = shift;
 	my $sight = $self->sight_range;
-	my @map = @{World::Entity::FOV::check_fov($sight,$self->sight_angle,$self->facing,$self)};#@{$self->fov};
+	my @map = @{World::Entity::FOV::check_fov($self)};#@{$self->fov};
 
 	my $map_memory = $self->map_memory;
 	my $surface = $self->surface;

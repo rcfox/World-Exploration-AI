@@ -4,10 +4,10 @@ use Storable qw(dclone);
 
 sub check_fov
 {
-	my $sight_range = shift;
-	my $sight_angle = shift;
-	my $facing = shift;
 	my $entity = shift;
+	my $sight_range = $entity->sight_range;
+	my $sight_angle = $entity->sight_angle;
+	my $facing = $entity->facing;
 	my @map = ();
 
 	my $room = $entity->room;
