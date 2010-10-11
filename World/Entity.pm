@@ -15,6 +15,8 @@ has 'name' => (isa => 'Str', is => 'rw');
 
 has 'room' => (isa => 'World::Room', is => 'rw');
 
+has 'sight_map' => (isa => 'Any', is => 'rw');
+
 has 'seen_entities' =>
     (
 	    isa => 'ArrayRef[World::Entity]',
@@ -74,6 +76,7 @@ sub learn_map
 	my $self = shift;
 	my $sight = $self->sight_range;
 	my @map = @{World::Entity::FOV::check_fov($self)};
+	$self->sight_map(\@map);
 	my $room = $self->room;
 
 	my $sx = $self->x;
@@ -140,7 +143,7 @@ sub look
 	my $self = shift;
 	my $surface = shift;
 	my $sight = $self->sight_range;
-	my @map = @{World::Entity::FOV::check_fov($self)};
+	my @map = @{$self->sight_map};
 
 	my $map_memory = $self->map_memory;
 
