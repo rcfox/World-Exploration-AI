@@ -42,7 +42,6 @@ has 'items' =>
 	    default => sub{[]},
 	);
 
-
 sub from_string
 {
 	my $self = shift;
@@ -65,37 +64,6 @@ sub from_string
 	$self->{width} = length $rows[0];
 	$self->map(\@map);
 	return $self;
-}
-
-sub draw
-{
-	my $self = shift;
-	for (my $y = 0; $y < $self->height; ++$y)
-	{
-		for(my $x = 0; $x < $self->width; ++$x)
-		{
-			print $self->map->[$y]->[$x]->char;
-		}
-		print "\n";
-	}
-}
-
-sub update
-{
-	my $self = shift;
-	for (my $y = 0; $y < $self->height; ++$y)
-	{
-		for(my $x = 0; $x < $self->width; ++$x)
-		{
-			$self->map->[$y]->[$x]->draw();;
-		}
-	}
-
-	my @entities = @{$self->entities};
-	foreach (@entities)
-	{
-		$_->draw();
-	}
 }
 
 sub add_entity
