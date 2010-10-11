@@ -73,7 +73,7 @@ sub learn_map
 {
 	my $self = shift;
 	my $sight = $self->sight_range;
-	my @map = @{World::Entity::FOV::check_fov($self)};#@{$self->fov};
+	my @map = @{World::Entity::FOV::check_fov($self)};
 	my $room = $self->room;
 
 	my $sx = $self->x;
@@ -139,7 +139,7 @@ sub look
 {
 	my $self = shift;
 	my $sight = $self->sight_range;
-	my @map = @{World::Entity::FOV::check_fov($self)};#@{$self->fov};
+	my @map = @{World::Entity::FOV::check_fov($self)};
 
 	my $map_memory = $self->map_memory;
 	my $surface = $self->surface;
@@ -184,62 +184,6 @@ sub look
 	foreach (@{$self->seen_items})
 	{
 		$_->draw();
-	}
-}
-
-sub update
-{
-	my $self = shift;
-	for (my $y = 0; $y < $self->room->height; ++$y)
-	{
-		for(my $x = 0; $x < $self->room->width; ++$x)
-		{
-			$self->map_memory->[$y]->[$x]->draw();
-		}
-	}
-
-	my @entities = @{$self->room->entities};
-	my $nothing = World::Feature->new(char=>' ',surface=>$self->surface,gfx_color=>0);
-	foreach (@{$self->seen_entities})
-	{
-		$_->draw();
-	}
-}
-
-sub fov_test
-{
-	my $self = shift;
-	my $sight = $self->sight_range;
-	my @map = @{World::Entity::FOV::check_fov($self)};#@{$self->fov};
-
-	my $map_memory = $self->map_memory;
-	my $surface = $self->surface;
-
-	my $room_map = $self->room->map;
-	my $room_width = $self->room->width;
-	my $room_height = $self->room->height;
-
-	my $sx = $self->x;
-	my $sy = $self->y;
-
-	my $rect = SDL::Rect->new(0,0,16,16);
-	my $color = 0;
-	for(my $y = 0; $y < $room_height; ++$y)
-	{
-		for(my $x = 0; $x < $room_width; ++$x)
-		{
-			$rect->x($x*16);
-			$rect->y($y*16);
-
-			my $tx = $x-$sx+$sight;
-			my $ty = $y-$sy+$sight;
-			$color = 0;
-			if ($tx >= 0 && $ty >= 0 && $map[$tx][$ty])
-			{
-				$color = rgb2c($map[$tx][$ty],0,0);#$room_map->[$y]->[$x]->gfx_color;
-			}
-			$surface->draw_rect($rect,$color);
-		}		
 	}
 }
 
