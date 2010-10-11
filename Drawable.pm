@@ -2,7 +2,8 @@ package Drawable;
 use Moose::Role;
 
 use SDL::Rect;
-use SDL::Color;
+
+use Utility;
 
 with 'Positionable';
 
@@ -21,19 +22,14 @@ has 'gfx_color' =>
         is => 'rw',
         isa => 'Int',
         lazy => 1,
-        default => sub { SDL::Video::map_RGB(shift()->surface->format(),0,0,0); },
+        default => sub{rgb2c(0,0,0)},
     );
-
-has 'surface' =>
-    (
-	    is => 'rw',
-	    isa => 'SDL::Surface',
-	);
 
 sub draw
 {
 	my $self = shift;
-	$self->surface->draw_rect($self->gfx_rect,$self->gfx_color);
+	my $surface = shift;
+	$surface->draw_rect($self->gfx_rect,$self->gfx_color);
 }
 
 after 'place' => sub

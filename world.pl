@@ -21,8 +21,7 @@ for (1..50)
 	my ($x,$y) = $room->random_free_coordinates();
 	$room->add_item(World::Item->new(x=>$x, y=>$y,
 	                                 name=>"Item".$_,room=>$room,
-	                                 gfx_color=>rgb2c($r,$g,$b),
-	                                 surface=>$gui->app));
+	                                 gfx_color=>rgb2c($r,$g,$b)));
 }
 
 for (1..25)
@@ -32,8 +31,7 @@ for (1..25)
 	$room->add_entity(World::Explorer->new(x=>$x, y=>$y,
 	                                       name=>"Explorer".$_,room=>$room,
 	                                       gfx_color=>rgb2c($r,$g,$b),
-	                                       go_x=>48,go_y=>2,
-	                                       surface=>$gui->app));
+	                                       go_x=>48,go_y=>2,));
 }
 
 $gui->add_click_handler(sub

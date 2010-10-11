@@ -25,7 +25,7 @@ sub BUILD
 	$app->add_show_handler(sub
 	                       {	                       
 		                       $app->draw_rect(undef,0);
-		                       $self->to_draw->look();
+		                       $self->to_draw->look($self->app);
 	                       });
 	$app->add_show_handler(sub { $app->update(); }); # This goes last!
 

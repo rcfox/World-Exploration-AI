@@ -38,7 +38,7 @@ has 'map_memory' =>
 	    {
 		    my $self = shift;
 		    my @map;
-		    my $nothing = World::Feature->new(char=>' ',surface=>$self->surface,gfx_color=>0);
+		    my $nothing = World::Feature->new(char=>' ',gfx_color=>0);
 		    for(my $y = 0; $y < $self->room->height; ++$y)
 		    {
 			    my @row;
@@ -138,11 +138,11 @@ sub manage_map_memory
 sub look
 {
 	my $self = shift;
+	my $surface = shift;
 	my $sight = $self->sight_range;
 	my @map = @{World::Entity::FOV::check_fov($self)};
 
 	my $map_memory = $self->map_memory;
-	my $surface = $self->surface;
 
 	my $room_map = $self->room->map;
 	my $room_width = $self->room->width;
@@ -179,11 +179,11 @@ sub look
 
 	foreach (@{$self->seen_entities})
 	{
-		$_->draw();
+		$_->draw($surface);
 	}
 	foreach (@{$self->seen_items})
 	{
-		$_->draw();
+		$_->draw($surface);
 	}
 }
 
