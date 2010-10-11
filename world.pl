@@ -5,23 +5,24 @@ use warnings;
 use Utility;
 use Getopt::Long;
 
-use SDLx::App;
-use SDL::Event;
-
 use World::Room::Demo;
 use World::Explorer;
 use World::Item;
 
+use GUI;
+my $gui = GUI->new();
+
 # Initialize the room and the inhabitants.
 my $room = World::Room::Demo->new();
 
-for (1..5)
+for (1..50)
 {
 	my ($r,$g,$b) = (255,0,0);
 	my ($x,$y) = $room->random_free_coordinates();
 	$room->add_item(World::Item->new(x=>$x, y=>$y,
 	                                 name=>"Item".$_,room=>$room,
-	                                 gfx_color=>rgb2c($r,$g,$b)));
+	                                 gfx_color=>rgb2c($r,$g,$b),
+	                                 surface=>$gui->app));
 }
 
 for (1..25)
@@ -31,63 +32,26 @@ for (1..25)
 	$room->add_entity(World::Explorer->new(x=>$x, y=>$y,
 	                                       name=>"Explorer".$_,room=>$room,
 	                                       gfx_color=>rgb2c($r,$g,$b),
-	                                       go_x=>48,go_y=>2));
+	                                       go_x=>48,go_y=>2,
+	                                       surface=>$gui->app));
 }
 
-# Set up the SDL Window
-my $app = SDLx::App->new(dt=>100);
-my $to_draw = $room->entities->[0];
-
-# Quit properly when told to do so.
-$app->add_event_handler(sub
+$gui->add_click_handler(sub
                         {
-	                        my $e = shift;
-	                        return if ( $e->type == SDL_QUIT );
-	                        return 1
-                        });
-
-$app->add_event_handler(sub
-                        {
-	                        my $e = shift;
-	                        if ( $e->type == SDL_MOUSEBUTTONUP )
+	                        my ($x,$y) = @_;
+	                        if ($room->map->[$y]->[$x]->char eq '#')
 	                        {
-		                        my ($mask,$x,$y) = @{ SDL::Events::get_mouse_state( ) };
-		                        $x = int($x / 16);
-		                        $y = int($y / 16);
-
-		                        if ($room->map->[$y]->[$x]->char eq '#')
-		                        {
-			                        $room->map->[$y]->[$x] = $room->map_legend->{'.'}->clone();
-		                        }
-		                        else
-		                        {
-			                        $room->map->[$y]->[$x] = $room->map_legend->{'#'}->clone();
-		                        }
+		                        $room->map->[$y]->[$x] = $room->map_legend->{'.'}->clone();
+	                        } else
+	                        {
+		                        $room->map->[$y]->[$x] = $room->map_legend->{'#'}->clone();
 	                        }
-	                        return 1
                         });
-
-# Update the screen
-$app->add_show_handler(sub
-                       {
-	                       $app->draw_rect(undef,0);
-	                       $to_draw->look();
-	                       #$to_draw->fov_test();
-                       });
-
-$app->add_show_handler(sub { $app->update(); }); # This goes last!
-
-foreach my $item (@{$room->items})
-{
-	$item->surface($app);
-}
 
 foreach my $entity (@{$room->entities})
 {
-	$entity->surface($app);
-
 	# Each entity will walk to a random point in the world.
-	$app->add_move_handler(sub 
+	$gui->add_tick_handler(sub 
 	                       {
 		                       if (!$entity->move_to($entity->go_x,$entity->go_y))
 		                       {
@@ -100,30 +64,14 @@ foreach my $entity (@{$room->entities})
 }
 
 # If a key is pressed, switch the entity that we're following.
-$app->add_event_handler(sub
-                        {
-	                        my $e = shift;
-	                        state $count = 0;
-	                        if ( $e->type == SDL_KEYDOWN )
-	                        {
-		                        $count = ($count + 1) % @{$room->entities};
-		                        $to_draw = $room->entities->[$count];
-		                        $app->draw_rect(undef,0);
-	                        }
-	                        return 1
-                        });
+$gui->add_key_handler('space', sub
+                      {
+	                      state $count = 0;
+	                      $count = ($count + 1) % @{$room->entities};
+	                      $gui->to_draw($room->entities->[$count]);
+	                      $gui->app->draw_rect(undef,0);
+                      });
+$gui->add_key_handler('escape', sub { exit(0); });
 
-# Sets whether or not to save each frame, for making a video.
-my $save_count = 0;
-my $save_screens;
-GetOptions('save' => \$save_screens);
-
-if ($save_screens)
-{
-	$app->add_move_handler(sub 
-	                       {
-		                       SDL::Video::save_BMP( $app, "screens/screen".$save_count++.".bmp" );
-	                       });
-}
-
-$app->run();
+$gui->to_draw($room->entities->[0]);
+$gui->run();

@@ -4,7 +4,7 @@ use Utility;
 
 use World::Entity::FOV qw(fov);
 
-with 'Positionable', 'Drawable', 'Controllable';
+with 'Positionable', 'Drawable', 'Controllable', 'Viewable';
 
 has 'facing' => (isa => 'Num', is => 'rw', default => 0);
 
