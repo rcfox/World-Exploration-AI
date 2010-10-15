@@ -15,7 +15,7 @@ my $gui = GUI->new();
 # Initialize the room and the inhabitants.
 my $room = World::Room::Demo->new();
 
-for (1..50)
+for (1..5)
 {
 	my ($r,$g,$b) = (255,0,0);
 	my ($x,$y) = $room->random_free_coordinates();
@@ -24,7 +24,7 @@ for (1..50)
 	                                 gfx_color=>rgb2c($r,$g,$b)));
 }
 
-for (1..25)
+for (1..15)
 {
 	my ($r,$g,$b) = (random_int_between(0,255),random_int_between(0,255),random_int_between(0,255));
 	my ($x,$y) = $room->random_free_coordinates();
@@ -61,7 +61,7 @@ foreach my $entity (@{$room->entities})
 	                       });
 }
 
-# If a key is pressed, switch the entity that we're following.
+# Switch the entity that we're following.
 $gui->add_key_handler('space', sub
                       {
 	                      state $count = 0;
